@@ -45,6 +45,16 @@ describe('notes service Supabase REST CRUD', () => {
     expect(JSON.parse(options.body)).toMatchObject({ title: 'A', content: 'B' })
   })
 
+  it('등록 응답에 생성 행이 없으면 명확한 오류를 반환한다', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 201 }),
+    ))
+
+    await expect(
+      createNote({ title: 'A', content: 'B', category: 'React' }),
+    ).rejects.toThrow('생성된 노트 정보를 확인할 수 없습니다.')
+  })
+
   it('수정은 PATCH를 사용한다', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify([{ id: 'abc', title: 'Updated' }]), { status: 200 }),

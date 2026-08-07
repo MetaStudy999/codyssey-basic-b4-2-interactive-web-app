@@ -30,6 +30,7 @@ export async function createNote(input) {
       category: input.category,
     }),
   })
+  if (!rows?.length) throw new Error('생성된 노트 정보를 확인할 수 없습니다.')
   return rows[0]
 }
 
