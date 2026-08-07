@@ -1,0 +1,23 @@
+name: B4-2 CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, mission/b4-2]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Verify structure
+        run: npm run verify
+      - name: Unit/component tests
+        run: npm test
+      - name: Production build
+        run: npm run build
