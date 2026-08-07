@@ -7,8 +7,8 @@ React SPA에서 **라우팅 → 컴포넌트 → 상태 → 이벤트 → 렌더
 ## 현재 상태
 
 - G1 SOURCE: PASS
-- G2 BUILD: 구현 완료 후 검증 예정
-- G3 TEST: 자동 테스트/빌드로 검증
+- G2 BUILD: IMPLEMENTED
+- G3 TEST: GitHub Actions에서 테스트/빌드 검증
 - G5/G6: 실제 Supabase + 배포 URL 검증 전에는 PASS로 표시하지 않습니다.
 
 ## 기술 스택
@@ -34,28 +34,29 @@ React SPA에서 **라우팅 → 컴포넌트 → 상태 → 이벤트 → 렌더
 
 ## 재사용 컴포넌트
 
-Mission의 “prop에 따라 표시/동작이 달라지는 컴포넌트” 기준으로 14개를 둡니다.
+Mission의 “최소 1개 이상의 prop을 받아 동작이나 표시가 달라지는 컴포넌트” 기준으로 **13개**를 명시적으로 관리합니다.
 
-1. `AppLayout`
-2. `Button`
-3. `TextField`
-4. `TextAreaField`
-5. `SelectField`
-6. `LoadingState`
-7. `ErrorState`
-8. `EmptyState`
-9. `PageHeader`
-10. `StatusBanner`
-11. `NoteCard`
-12. `NoteList`
-13. `NoteForm`
-14. `ConfirmDialog`
+1. `Button`
+2. `TextField`
+3. `TextAreaField`
+4. `SelectField`
+5. `LoadingState`
+6. `ErrorState`
+7. `EmptyState`
+8. `PageHeader`
+9. `StatusBanner`
+10. `NoteCard`
+11. `NoteList`
+12. `NoteForm`
+13. `ConfirmDialog`
+
+`AppLayout`은 여러 페이지가 공유하는 공통 레이아웃이지만 prop을 받지 않으므로 위 13개 평가용 재사용 컴포넌트 수에는 포함하지 않습니다.
 
 ## 폴더 구조
 
 ```text
 src/
-├── components/   # prop 기반 재사용 UI
+├── components/   # prop 기반 재사용 UI + 공통 레이아웃
 ├── hooks/        # useEffect + 비동기 상태 캡슐화
 ├── lib/          # Supabase client 설정
 ├── pages/        # 라우트 단위 화면
