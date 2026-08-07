@@ -45,17 +45,17 @@ Source Gap: Evaluation PDF는 발견되지 않았지만 유효한 Evaluation Mar
 
 ## 4. Requirement Traceability / Evaluation Mapping
 
-| Requirement | Planned Evidence |
+| Requirement | Evidence / State |
 |---|---|
-| 5+ routes + Not Found | `src/App.jsx`, route runtime capture |
-| CRUD | `src/services/notes.js`, local/deployed CRUD capture |
-| loading/error/empty | shared components + runtime capture |
-| form validation/submitting | `NoteForm` tests + runtime capture |
-| custom hook | `useNotes`, `useNote`, hook tests |
-| folders | `src/pages`, `src/components`, `src/hooks`, `src/lib` |
-| 8+ reusable components | component inventory in README |
-| 3+ state-render changes | `docs/LEARNING.md` + tests/runtime |
-| deployed CRUD | deployment URL + browser evidence |
+| 5+ routes + Not Found | `src/App.jsx`; structure + route test PASS; browser runtime pending |
+| CRUD | `src/services/notes.js`; mocked REST tests PASS; real Supabase runtime pending |
+| loading/error/empty | shared components; component/hook tests PASS; browser capture pending |
+| form validation/submitting | `NoteForm` tests PASS; browser capture pending |
+| custom hook | `useNotes`, `useNote`; hook tests PASS |
+| folders | `src/pages`, `src/components`, `src/hooks`, `src/lib` IMPLEMENTED |
+| 8+ reusable components | 13 prop-based components; static verification PASS |
+| 3+ state-render changes | `docs/LEARNING.md`; form/hook tests cover examples; browser explanation pending |
+| deployed CRUD | NEEDS-RUNTIME |
 
 ## 5. Repository Baseline
 
@@ -76,7 +76,7 @@ G1 조사 시점 `main` SHA: `d1a72a8ecdf0857dd1e96ecc746816927be4b943`
 - 독립 구현 가능하므로 B4-1 완료를 기다리지 않는다.
 - Control Tower drift: 시작 시점 발견 없음. Frozen baseline을 계속 사용한다.
 
-## 7. Build Plan
+## 7. Implemented Build
 
 도메인: `Learning Notes`
 
@@ -89,46 +89,51 @@ Routes:
 6. `/about`
 7. `*` Not Found
 
-Remote backend: Supabase `notes` 단일 테이블.
+Remote backend adapter: Supabase `notes` 단일 테이블 / PostgREST.
 
-## 8. Component / Hook Plan
+## 8. Component / Hook Inventory
 
-Reusable components target >= 8: Button, TextField, TextAreaField, SelectField, LoadingState, ErrorState, EmptyState, PageHeader, StatusBanner, NoteCard, NoteList, NoteForm, ConfirmDialog, AppLayout.
+Evaluation 정의를 만족하는 prop 기반 reusable components 13개:
+
+`Button`, `TextField`, `TextAreaField`, `SelectField`, `LoadingState`, `ErrorState`, `EmptyState`, `PageHeader`, `StatusBanner`, `NoteCard`, `NoteList`, `NoteForm`, `ConfirmDialog`.
+
+`AppLayout`은 공통 레이아웃이지만 prop을 받지 않으므로 위 평가 수에는 포함하지 않는다.
 
 Custom hooks: `useNotes`, `useNote`.
 
-## 9. Test Plan
+## 9. Test Result
 
-Automated:
-- route home / Not Found
-- form required validation
-- controlled input → preview render
-- submitting disabled state
-- hook loading → success / error
+GitHub Actions run `31213178156`, head `2e81cf5373fa0ebe157f5e2f5d07817ff36b15b3`: SUCCESS.
+
+통과 단계:
+- dependency install
+- structure verification
+- unit/component tests
 - production build
 
-Runtime:
+Runtime still required:
 - all routes + direct URL refresh
 - real Supabase persistence CRUD
-- loading/error/empty state
+- loading/error/empty browser state
 - deployed URL CRUD
 
 ## 10. Agent Routing / Review Budget
 
 - Orchestrator/Builder: ChatGPT
 - Automated harness: Vitest + Vite build
-- Independent reviewer: 1회, G4에서 BLOCKER/MAJOR만 집중
-- Review budget: self review 1회 + independent review 1회 + 필요한 항목만 재검증 1회
+- Self review: 1회 완료 (`docs/SELF-REVIEW.md`)
+- Independent reviewer: G4 종료 전에 1회 필요. 현재 실행 환경에 별도 reviewer agent가 직접 노출되지 않아 미실행 상태를 숨기지 않는다.
+- Review budget: independent review 1회 + 필요한 항목만 재검증 1회
 
 ## 11. Gate Checklist
 
 - G1 SOURCE: PASS
-- G2 BUILD: TODO
-- G3 TEST: TODO
-- G4 REVIEW: TODO
-- G5 RUNTIME: TODO
+- G2 BUILD: IMPLEMENTED
+- G3 TEST: PASS (GitHub Actions)
+- G4 REVIEW: IN PROGRESS (self review complete, independent reviewer pending)
+- G5 RUNTIME: NEEDS-RUNTIME (Supabase project/deployment required)
 - G6 EVIDENCE: TODO
-- G7 LEARN: TODO
+- G7 LEARN: IMPLEMENTED
 - G8 MERGE: TODO
 
 ## 12. STOP Rule
