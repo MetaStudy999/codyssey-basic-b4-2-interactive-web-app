@@ -14,71 +14,65 @@
 | Source | State | Role |
 |---|---|---|
 | `b4-2-mission.pdf` (6 pages) | VALID | 최고 우선 Mission Source |
-| `b4-2-mission.md` | DUPLICATE | PDF 내용을 Markdown 구조로 정리 |
+| `b4-2-mission.md` | DUPLICATE | PDF의 Markdown 정리본 |
 | `b4-2-evaluation.md` | VALID | 공식 평가문항 |
 
-Source Mode: `FULL SOURCE`
-Source Confidence: `HIGH`
-Source Gap: Evaluation PDF는 발견되지 않았지만 유효한 Evaluation Markdown이 있어 요구사항 확정에는 Gap이 없음.
+- Source Mode: `FULL SOURCE`
+- Source Confidence: `HIGH`
+- Remaining Source Gap: 없음. 별도 Evaluation PDF는 없지만 유효한 Evaluation Markdown으로 평가 요구를 확정함.
 
 ## 3. Mission Contract
 
-### 필수
+필수 계약:
 
-- React 18+ SPA
-- 주요 라우트 5개 이상 + Not Found
-- 단일 핵심 데이터의 원격 CRUD(Supabase 또는 Firebase)
-- 목록/상세/등록/수정/삭제
-- `pages`, `components`, `hooks` 또는 `lib` 역할 분리
-- prop에 따라 표시/동작이 달라지는 재사용 컴포넌트 8개 이상
-- controlled form, required validation, error message, submitting state
-- 공통 loading/error/empty UI
-- 조회/갱신 흐름 최소 1개 custom hook
-- 상태 변경 → 렌더 변화 3곳 이상
-- 배포 URL에서 CRUD 전체 동작
-- `.env` / 배포 Environment Variables로 key 관리
+1. React 18+ SPA
+2. 주요 라우트 5개 이상 + Not Found + navigation
+3. Supabase/Firebase 원격 CRUD
+4. 목록/상세/등록/수정/삭제
+5. `pages`, `components`, `hooks` 또는 `lib` 책임 분리
+6. prop 기반 재사용 컴포넌트 8개 이상
+7. controlled form + required validation + error + submitting state
+8. 공통 loading/error/empty UI
+9. 데이터 흐름 custom hook 최소 1개
+10. state → render 변화 3곳 이상
+11. 공개 배포 URL에서 CRUD 동작
+12. README 실행법/기술 스택 + 환경변수/키 관리
 
-### Non-scope
-
-- 인증/RLS 고도화, 복잡한 관계, 별도 백엔드 서버
-- 보너스 성능 최적화/전역 상태는 완료를 지연시키지 않음
+Non-scope: 인증 고도화, 복잡한 관계, 별도 백엔드 서버, Mission 완료를 지연시키는 선택적 리팩터링.
 
 ## 4. Requirement Traceability / Evaluation Mapping
 
-| Requirement | Evidence / State |
+| Requirement | Final Evidence |
 |---|---|
-| 5+ routes + Not Found | `src/App.jsx`; verifier/test PASS; deploy bundle has SPA `404.html`; final public-browser verification pending |
-| CRUD | `src/services/notes.js`; tests PASS; real Supabase DB create/read/update/delete smoke PASS |
-| loading/error/empty | shared components + tests PASS; final public-browser observation pending |
-| form validation/submitting | `NoteForm` tests PASS; final public-browser observation pending |
-| custom hook | `useNotes`, `useNote`; hook tests PASS |
-| folders | `src/pages`, `src/components`, `src/hooks`, `src/lib` IMPLEMENTED |
-| 8+ reusable components | 13 prop-based components; static verification PASS |
-| 3+ state-render changes | `docs/LEARNING.md` + tests document/cover examples |
-| deployed CRUD | backend/runtime infrastructure prepared; final public SPA host verification blocked by host-control permission |
+| React 18+ | `package.json` React 18.3.1 |
+| 5+ routes + Not Found | `src/App.jsx`; 7 path routes; structure test PASS; deployed Not Found E2E PASS |
+| remote CRUD | `src/services/notes.js`; Supabase `notes`; real DB + deployed browser C/R/U/D PASS |
+| persistence | 생성 후 hard refresh에서 동일 데이터 확인 PASS |
+| loading/error/empty | shared state components 존재; unit/hook tests PASS; deployed empty-search state PASS |
+| validation/submitting | `NoteForm`; tests PASS; deployed required validation PASS |
+| custom hooks | `useNotes`, `useNote`; tests PASS |
+| folder separation | `src/pages`, `src/components`, `src/hooks`, `src/lib`, `src/services` |
+| reusable components >=8 | prop-based 13개; static verification PASS |
+| state-render >=3 | search/filter, form preview/input, dialog/submitting/loading/error 흐름; `docs/LEARNING.md` |
+| public deployment | GitHub Pages public URL; direct `/notes` refresh PASS |
+| secret handling | `.env*` ignored; actual secret/service-role key 미사용·미커밋 |
 
 ## 5. Repository Baseline
 
-G1 조사 시점 `main` SHA: `d1a72a8ecdf0857dd1e96ecc746816927be4b943`
+G1 시점 `main` SHA: `d1a72a8ecdf0857dd1e96ecc746816927be4b943`
 
-- React project: 없음
-- `package.json`: 없음
-- routes: 0
-- data source: 없음
-- tests: 없음
-- deployment config/URL: 없음
-- 문서만 존재: README + Mission PDF/MD + Evaluation MD
+당시 React project, `package.json`, routes, data source, tests, deployment가 없었고 Mission/Evaluation 문서만 존재했다.
 
 ## 6. Dependency / Drift
 
 - B4-1 공식 선행조건: `NONE`
 - 운영상 관계: `RECOMMENDED`
-- 독립 구현 가능하므로 B4-1 완료를 기다리지 않는다.
-- Control Tower는 수정하지 않는다.
+- B4-1 산출물 없이 독립 구현 가능
+- Control Tower Drift: 완료 판정에 영향을 주는 drift 없음; Frozen Baseline 유지
 
 ## 7. Implemented Build
 
-도메인: `Learning Notes`
+Domain: `Learning Notes`
 
 Routes:
 1. `/`
@@ -89,74 +83,74 @@ Routes:
 6. `/about`
 7. `*` Not Found
 
-Remote backend adapter: Supabase `notes` 단일 테이블 / PostgREST.
+Remote backend:
+- Supabase project: `codyssey-b4-2-learning-notes`
+- project ref: `metyfpxbqoxfuhkuupyd`
+- region: `ap-northeast-2`
+- table: `public.notes`
+- browser-facing CRUD via PostgREST
+
+Deployment:
+- `https://metastudy999.github.io/codyssey-basic-b4-2-interactive-web-app/`
+- Pages source: `runtime-dist` / root
+- `404.html` SPA direct-route fallback
+- Supabase Edge Function `b4-2-app` supplies browser-safe runtime configuration
 
 ## 8. Component / Hook Inventory
 
-Evaluation 정의를 만족하는 prop 기반 reusable components 13개:
+Prop-based reusable components 13개:
 
 `Button`, `TextField`, `TextAreaField`, `SelectField`, `LoadingState`, `ErrorState`, `EmptyState`, `PageHeader`, `StatusBanner`, `NoteCard`, `NoteList`, `NoteForm`, `ConfirmDialog`.
-
-`AppLayout`은 공통 레이아웃이지만 prop을 받지 않으므로 위 평가 수에는 포함하지 않는다.
 
 Custom hooks: `useNotes`, `useNote`.
 
 ## 9. Test / Runtime Result
 
-### Automated verification
+Verified implementation head: `c2894d05dba2dd0f9e52234c3ebe2581a25dbb94`
 
-Latest clean mission CI: run `31259552143` on commit `61bbce4e06639f244af4aada2efdb04e391822ed`: SUCCESS.
+GitHub Actions push run `31261542821`: SUCCESS.
 
-Passed stages:
+PASS stages:
 - dependency install
 - structure verification
-- 13 unit/component tests
+- Vitest: 4 files / 13 tests
 - production build
-- runtime bundle preparation
-- production artifact upload
-- `runtime-dist` branch publication
+- deployable bundle preparation
+- `runtime-dist` publication
+- GitHub Pages expected-commit build wait
+- Selenium/Headless Chrome public deployment E2E
 
-### Independent review
+Live E2E final output:
 
-- Reviewer: GitHub Copilot
-- Initial: BLOCKER 0 / MAJOR 1
-- MAJOR: `createNote()` empty representation could produce an undefined id
-- Disposition: ACCEPT; fixed in `71c7430b5339230026410f1f71ca1d84582470bf` with regression test
-- Revalidation CI: SUCCESS
+`LIVE_E2E_PASS: root, direct-route refresh, validation, create, read, update, empty-search, delete, not-found`
+
+Runtime-generated E2E rows are deleted; cleanup verification found 0 matching rows after the earlier failed attempt, and the successful flow deletes its row through the UI.
+
+## 10. Review Result
+
+- Self review: completed
+- Independent reviewer: GitHub Copilot code review
+- Initial result: BLOCKER 0 / MAJOR 1 / MINOR 3
+- MAJOR disposition: ACCEPT and fixed in `71c7430b5339230026410f1f71ca1d84582470bf`
+- Regression test + CI revalidation: PASS
 - Effective result: BLOCKER 0 / MAJOR 0
-- Accessibility MINOR findings retained as PRO backlog under STOP rule
+- Accessibility MINOR 3: optional PRO backlog under STOP rule
 
-### Real Supabase runtime
-
-- Project: `codyssey-b4-2-learning-notes`
-- Project ref: `metyfpxbqoxfuhkuupyd`
-- Region: `ap-northeast-2`
-- Schema/educational anonymous CRUD permissions applied
-- Real DB create → read → update → delete smoke verification PASS; test data cleaned up
-- Edge Function `b4-2-app` deployed as public runtime-config endpoint
-- Server-side HTTP smoke verified health/root/direct-route/static-asset availability during deployment work
-
-### Public host blocker
-
-A deployable SPA artifact is published to `runtime-dist`. Automatic GitHub Pages activation was attempted but GitHub returned `403 Resource not accessible by integration`; the repository Actions token cannot create/enable the Pages site. Vercel connector deployment responses could not be independently retrieved afterward and therefore are not accepted as evidence.
-
-Accordingly, final browser-host CRUD/direct-refresh evidence is deliberately not marked PASS.
-
-## 10. Gate Checklist
+## 11. Gate Checklist
 
 - G1 SOURCE: PASS
 - G2 BUILD: PASS
 - G3 TEST: PASS
-- G4 REVIEW: PASS — effective BLOCKER 0 / MAJOR 0
-- G5 RUNTIME: PARTIAL — real Supabase CRUD PASS; final public SPA browser host verification pending
-- G6 EVIDENCE: PARTIAL — source/test/review/backend/deploy-artifact evidence complete; public browser evidence pending
-- G7 LEARN: PASS (`docs/LEARNING.md`)
-- G8 MERGE: BLOCKED by G5/G6; PR remains Draft
+- G4 REVIEW: PASS — BLOCKER 0 / MAJOR 0
+- G5 RUNTIME: PASS — public deployed browser + real Supabase CRUD
+- G6 EVIDENCE: PASS — source/code/test/review/runtime/deployment evidence recorded
+- G7 LEARN: PASS — `docs/LEARNING.md`
+- G8 MERGE: READY — final docs CI 후 PR #1 merge
 
-## 11. STOP / Merge Rule
+## 12. STOP Rule
 
-Do not merge until the public SPA host is enabled and the deployed URL is verified for direct-route refresh plus create/read/update/delete and required UI states. Do not downgrade this external permission gap into a false PASS.
+필수 Mission/Evaluation 요구, 자동 테스트, 실제 public runtime, Evidence, BLOCKER 0 / MAJOR 0를 충족했다. 추가 접근성 MINOR 및 고도화는 완료를 지연시키지 않는 backlog로 유지한다.
 
-## 12. Next External Action
+## 13. Handoff Contract
 
-Enable GitHub Pages for this repository using branch `runtime-dist` and folder `/ (root)` (or establish another independently verifiable static host). After the site is live, perform final browser runtime evidence, then write completion handoff/result and merge PR #1.
+`HANDOFF.md`와 `mission-result.yaml`을 대표 Repository Serial Integration의 입력으로 사용한다. Control Tower는 이 Workcell에서 수정하지 않는다.
