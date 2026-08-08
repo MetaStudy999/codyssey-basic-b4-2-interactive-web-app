@@ -5,6 +5,9 @@ on:
   push:
     branches: [main, mission/b4-2]
 
+permissions:
+  contents: write
+
 jobs:
   test-build:
     runs-on: ubuntu-latest
@@ -27,3 +30,21 @@ jobs:
           name: b4-2-dist
           path: dist/
           if-no-files-found: error
+      - name: Publish runtime bundle branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/mission/b4-2'
+        run: |
+          publish_dir="$RUNNER_TEMP/b4-2-runtime-dist"
+          rm -rf "$publish_dir"
+          mkdir -p "$publish_dir"
+          cp -R dist/. "$publish_dir/"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan runtime-dist
+          git rm -rf .
+          git clean -fdx
+          cp -R "$publish_dir"/. .
+          touch .nojekyll
+          git add -A
+          git commit -m "chore: publish runtime bundle ${GITHUB_SHA}"
+          git push --force origin HEAD:runtime-dist
