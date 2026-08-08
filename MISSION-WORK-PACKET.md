@@ -40,22 +40,22 @@ Source Gap: Evaluation PDF는 발견되지 않았지만 유효한 Evaluation Mar
 
 ### Non-scope
 
-- 인증, RLS 고도화, 복잡한 관계, 별도 백엔드 서버
+- 인증/RLS 고도화, 복잡한 관계, 별도 백엔드 서버
 - 보너스 성능 최적화/전역 상태는 완료를 지연시키지 않음
 
 ## 4. Requirement Traceability / Evaluation Mapping
 
 | Requirement | Evidence / State |
 |---|---|
-| 5+ routes + Not Found | `src/App.jsx`; structure + route test PASS; browser runtime pending |
-| CRUD | `src/services/notes.js`; mocked REST tests PASS; real Supabase runtime pending |
-| loading/error/empty | shared components; component/hook tests PASS; browser capture pending |
-| form validation/submitting | `NoteForm` tests PASS; browser capture pending |
+| 5+ routes + Not Found | `src/App.jsx`; verifier/test PASS; deploy bundle has SPA `404.html`; final public-browser verification pending |
+| CRUD | `src/services/notes.js`; tests PASS; real Supabase DB create/read/update/delete smoke PASS |
+| loading/error/empty | shared components + tests PASS; final public-browser observation pending |
+| form validation/submitting | `NoteForm` tests PASS; final public-browser observation pending |
 | custom hook | `useNotes`, `useNote`; hook tests PASS |
 | folders | `src/pages`, `src/components`, `src/hooks`, `src/lib` IMPLEMENTED |
 | 8+ reusable components | 13 prop-based components; static verification PASS |
-| 3+ state-render changes | `docs/LEARNING.md`; form/hook tests cover examples; browser explanation pending |
-| deployed CRUD | NEEDS-RUNTIME |
+| 3+ state-render changes | `docs/LEARNING.md` + tests document/cover examples |
+| deployed CRUD | backend/runtime infrastructure prepared; final public SPA host verification blocked by host-control permission |
 
 ## 5. Repository Baseline
 
@@ -71,10 +71,10 @@ G1 조사 시점 `main` SHA: `d1a72a8ecdf0857dd1e96ecc746816927be4b943`
 
 ## 6. Dependency / Drift
 
-- B4-1 공식 선행조건: `NONE` (B4-2 Mission/Evaluation에 선행 완료 요구 없음)
-- 운영상 관계: `RECOMMENDED` (웹 기초 지식이 React 학습 기반)
+- B4-1 공식 선행조건: `NONE`
+- 운영상 관계: `RECOMMENDED`
 - 독립 구현 가능하므로 B4-1 완료를 기다리지 않는다.
-- Control Tower drift: 시작 시점 발견 없음. Frozen baseline을 계속 사용한다.
+- Control Tower는 수정하지 않는다.
 
 ## 7. Implemented Build
 
@@ -101,45 +101,62 @@ Evaluation 정의를 만족하는 prop 기반 reusable components 13개:
 
 Custom hooks: `useNotes`, `useNote`.
 
-## 9. Test Result
+## 9. Test / Runtime Result
 
-GitHub Actions run `31213178156`, head `2e81cf5373fa0ebe157f5e2f5d07817ff36b15b3`: SUCCESS.
+### Automated verification
 
-통과 단계:
+Latest clean mission CI: run `31259552143` on commit `61bbce4e06639f244af4aada2efdb04e391822ed`: SUCCESS.
+
+Passed stages:
 - dependency install
 - structure verification
-- unit/component tests
+- 13 unit/component tests
 - production build
+- runtime bundle preparation
+- production artifact upload
+- `runtime-dist` branch publication
 
-Runtime still required:
-- all routes + direct URL refresh
-- real Supabase persistence CRUD
-- loading/error/empty browser state
-- deployed URL CRUD
+### Independent review
 
-## 10. Agent Routing / Review Budget
+- Reviewer: GitHub Copilot
+- Initial: BLOCKER 0 / MAJOR 1
+- MAJOR: `createNote()` empty representation could produce an undefined id
+- Disposition: ACCEPT; fixed in `71c7430b5339230026410f1f71ca1d84582470bf` with regression test
+- Revalidation CI: SUCCESS
+- Effective result: BLOCKER 0 / MAJOR 0
+- Accessibility MINOR findings retained as PRO backlog under STOP rule
 
-- Orchestrator/Builder: ChatGPT
-- Automated harness: Vitest + Vite build
-- Self review: 1회 완료 (`docs/SELF-REVIEW.md`)
-- Independent reviewer: G4 종료 전에 1회 필요. 현재 실행 환경에 별도 reviewer agent가 직접 노출되지 않아 미실행 상태를 숨기지 않는다.
-- Review budget: independent review 1회 + 필요한 항목만 재검증 1회
+### Real Supabase runtime
 
-## 11. Gate Checklist
+- Project: `codyssey-b4-2-learning-notes`
+- Project ref: `metyfpxbqoxfuhkuupyd`
+- Region: `ap-northeast-2`
+- Schema/educational anonymous CRUD permissions applied
+- Real DB create → read → update → delete smoke verification PASS; test data cleaned up
+- Edge Function `b4-2-app` deployed as public runtime-config endpoint
+- Server-side HTTP smoke verified health/root/direct-route/static-asset availability during deployment work
+
+### Public host blocker
+
+A deployable SPA artifact is published to `runtime-dist`. Automatic GitHub Pages activation was attempted but GitHub returned `403 Resource not accessible by integration`; the repository Actions token cannot create/enable the Pages site. Vercel connector deployment responses could not be independently retrieved afterward and therefore are not accepted as evidence.
+
+Accordingly, final browser-host CRUD/direct-refresh evidence is deliberately not marked PASS.
+
+## 10. Gate Checklist
 
 - G1 SOURCE: PASS
-- G2 BUILD: IMPLEMENTED
-- G3 TEST: PASS (GitHub Actions)
-- G4 REVIEW: IN PROGRESS (self review complete, independent reviewer pending)
-- G5 RUNTIME: NEEDS-RUNTIME (Supabase project/deployment required)
-- G6 EVIDENCE: TODO
-- G7 LEARN: IMPLEMENTED
-- G8 MERGE: TODO
+- G2 BUILD: PASS
+- G3 TEST: PASS
+- G4 REVIEW: PASS — effective BLOCKER 0 / MAJOR 0
+- G5 RUNTIME: PARTIAL — real Supabase CRUD PASS; final public SPA browser host verification pending
+- G6 EVIDENCE: PARTIAL — source/test/review/backend/deploy-artifact evidence complete; public browser evidence pending
+- G7 LEARN: PASS (`docs/LEARNING.md`)
+- G8 MERGE: BLOCKED by G5/G6; PR remains Draft
 
-## 12. STOP Rule
+## 11. STOP / Merge Rule
 
-Mission/Evaluation 필수 요구 충족 + BLOCKER 0 + MAJOR 0 + 자동 테스트 통과 + 실제 Supabase/deployed runtime Evidence 완료 시 종료하고 추가 고도화는 backlog로 이동한다.
+Do not merge until the public SPA host is enabled and the deployed URL is verified for direct-route refresh plus create/read/update/delete and required UI states. Do not downgrade this external permission gap into a false PASS.
 
-## 13. Handoff Contract
+## 12. Next External Action
 
-완료 시 `HANDOFF.md`, `mission-result.yaml`에 Source Mode, route/component/hook/CRUD coverage, test/runtime/evidence, final PR/SHA, remaining risk를 기록한다. Control Tower는 수정하지 않는다.
+Enable GitHub Pages for this repository using branch `runtime-dist` and folder `/ (root)` (or establish another independently verifiable static host). After the site is live, perform final browser runtime evidence, then write completion handoff/result and merge PR #1.
