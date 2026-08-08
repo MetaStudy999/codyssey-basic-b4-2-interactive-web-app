@@ -23,11 +23,15 @@ export function getSupabaseConfig() {
     )
   }
 
+  const authorizationHeader = supabaseAnonKey.startsWith('sb_publishable_')
+    ? {}
+    : { Authorization: `Bearer ${supabaseAnonKey}` }
+
   return {
     baseUrl: `${supabaseUrl.replace(/\/$/, '')}/rest/v1`,
     headers: {
       apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+      ...authorizationHeader,
       'Content-Type': 'application/json',
     },
   }
