@@ -21,3 +21,9 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
+      - name: Upload production bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: b4-2-dist
+          path: dist/
+          if-no-files-found: error

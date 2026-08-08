@@ -1,10 +1,21 @@
+function runtimeConfig() {
+  if (typeof window === 'undefined') return {}
+  return window.__APP_CONFIG__ ?? {}
+}
+
+function envValue(name) {
+  const runtime = runtimeConfig()
+  if (runtime[name]) return runtime[name]
+  return import.meta.env[name]
+}
+
 export function isSupabaseConfigured() {
-  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
+  return Boolean(envValue('VITE_SUPABASE_URL') && envValue('VITE_SUPABASE_ANON_KEY'))
 }
 
 export function getSupabaseConfig() {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const supabaseUrl = envValue('VITE_SUPABASE_URL')
+  const supabaseAnonKey = envValue('VITE_SUPABASE_ANON_KEY')
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
