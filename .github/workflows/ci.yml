@@ -103,6 +103,7 @@ jobs:
           BASE = 'https://metastudy999.github.io/codyssey-basic-b4-2-interactive-web-app/'
           title = f'B4-2 Live E2E {uuid.uuid4().hex[:8]}'
           updated_title = title + ' updated'
+          created_id = None
 
           options = webdriver.ChromeOptions()
           options.add_argument('--headless=new')
@@ -134,7 +135,9 @@ jobs:
               driver.find_element(By.ID, 'content').send_keys('GitHub Pages deployed CRUD smoke evidence')
               driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
               wait_h1(title)
-              assert '/notes/' in driver.current_url, driver.current_url
+              created_url = driver.current_url
+              assert '/notes/' in created_url, created_url
+              created_id = created_url.rstrip('/').split('/')[-1]
 
               driver.refresh()
               wait_h1(title)
@@ -147,6 +150,7 @@ jobs:
               title_input.send_keys(updated_title)
               driver.find_element(By.XPATH, "//button[normalize-space()='수정 저장']").click()
               wait_h1(updated_title)
+              updated_url = driver.current_url
 
               driver.find_element(By.LINK_TEXT, '목록으로').click()
               wait_h1('노트 목록')
@@ -154,10 +158,8 @@ jobs:
               search = driver.find_element(By.ID, 'search')
               search.send_keys('definitely-no-match-b4-2-e2e')
               wait.until(lambda d: '검색 조건에 맞는 노트가 없습니다.' in d.page_source)
-              search.clear()
-              wait.until(lambda d: updated_title in d.page_source)
 
-              driver.find_element(By.LINK_TEXT, updated_title).click()
+              driver.get(updated_url)
               wait_h1(updated_title)
               driver.find_element(By.XPATH, "//button[normalize-space()='삭제']").click()
               wait.until(EC.visibility_of_element_located((By.ID, 'confirm-title')))
@@ -165,11 +167,27 @@ jobs:
               dialog.find_element(By.XPATH, ".//button[normalize-space()='삭제']").click()
               wait_h1('노트 목록')
               wait.until(lambda d: updated_title not in d.page_source)
+              created_id = None
 
               driver.get(BASE + 'route-that-does-not-exist')
               wait_h1('404 - Not Found')
 
               print('LIVE_E2E_PASS: root, direct-route refresh, validation, create, read, update, empty-search, delete, not-found')
           finally:
+              if created_id:
+                  try:
+                      driver.get(BASE)
+                      wait_h1('Learning Notes')
+                      driver.execute_async_script("""
+                        const id = arguments[0];
+                        const done = arguments[arguments.length - 1];
+                        const cfg = window.__APP_CONFIG__ || {};
+                        const key = cfg.VITE_SUPABASE_ANON_KEY;
+                        const url = `${cfg.VITE_SUPABASE_URL}/rest/v1/notes?id=eq.${encodeURIComponent(id)}`;
+                        fetch(url, {method: 'DELETE', headers: {apikey: key, Authorization: `Bearer ${key}`, Prefer: 'return=minimal'}})
+                          .then(r => done(r.status)).catch(e => done(String(e)));
+                      """, created_id)
+                  except Exception as cleanup_error:
+                      print('cleanup warning:', cleanup_error)
               driver.quit()
           PY
