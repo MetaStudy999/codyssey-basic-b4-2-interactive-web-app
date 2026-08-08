@@ -64,4 +64,115 @@ jobs:
           touch .nojekyll
           git add -A
           git commit -m "chore: publish runtime bundle ${GITHUB_SHA}"
+          echo "RUNTIME_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           git push --force origin HEAD:runtime-dist
+      - name: Wait for GitHub Pages build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/mission/b4-2'
+        run: |
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest"
+          for attempt in $(seq 1 36); do
+            payload=$(curl -fsSL "$api" || true)
+            status=$(printf '%s' "$payload" | python -c 'import json,sys; d=json.load(sys.stdin); print(d.get("status", ""))' 2>/dev/null || true)
+            commit=$(printf '%s' "$payload" | python -c 'import json,sys; d=json.load(sys.stdin); print(d.get("commit", ""))' 2>/dev/null || true)
+            echo "Pages attempt ${attempt}: status=${status} commit=${commit} expected=${RUNTIME_SHA}"
+            if [ "$status" = "built" ] && [ "$commit" = "$RUNTIME_SHA" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "GitHub Pages did not publish the expected runtime commit in time."
+          exit 1
+      - name: Live browser CRUD smoke
+        if: github.event_name == 'push' && github.ref == 'refs/heads/mission/b4-2'
+        run: |
+          python -m pip install --quiet selenium
+          python - <<'PY'
+          import uuid
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+
+          BASE = 'https://metastudy999.github.io/codyssey-basic-b4-2-interactive-web-app/'
+          title = f'B4-2 Live E2E {uuid.uuid4().hex[:8]}'
+          updated_title = title + ' updated'
+
+          options = webdriver.ChromeOptions()
+          options.add_argument('--headless=new')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_argument('--window-size=1440,1200')
+
+          driver = webdriver.Chrome(options=options)
+          wait = WebDriverWait(driver, 25)
+
+          def wait_h1(expected):
+              wait.until(lambda d: d.find_element(By.TAG_NAME, 'h1').text == expected)
+
+          try:
+              driver.get(BASE)
+              wait_h1('Learning Notes')
+
+              # Direct route refresh must restore the SPA through GitHub Pages 404 fallback.
+              driver.get(BASE + 'notes')
+              wait_h1('노트 목록')
+              driver.refresh()
+              wait_h1('노트 목록')
+
+              driver.get(BASE + 'notes/new')
+              wait_h1('새 노트')
+
+              # Required field validation.
+              driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
+              wait.until(lambda d: '제목을 입력하세요.' in d.page_source and '내용을 입력하세요.' in d.page_source)
+
+              # Create.
+              driver.find_element(By.ID, 'title').send_keys(title)
+              driver.find_element(By.ID, 'content').send_keys('GitHub Pages deployed CRUD smoke evidence')
+              driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
+              wait_h1(title)
+              created_url = driver.current_url
+              assert '/notes/' in created_url, created_url
+
+              # Read persists across a hard refresh.
+              driver.refresh()
+              wait_h1(title)
+              wait.until(lambda d: 'GitHub Pages deployed CRUD smoke evidence' in d.page_source)
+
+              # Update.
+              driver.find_element(By.LINK_TEXT, '수정').click()
+              wait_h1('노트 수정')
+              title_input = driver.find_element(By.ID, 'title')
+              title_input.clear()
+              title_input.send_keys(updated_title)
+              driver.find_element(By.XPATH, "//button[normalize-space()='수정 저장']").click()
+              wait_h1(updated_title)
+
+              # List and client-side empty search state.
+              driver.find_element(By.LINK_TEXT, '목록으로').click()
+              wait_h1('노트 목록')
+              wait.until(lambda d: updated_title in d.page_source)
+              search = driver.find_element(By.ID, 'search')
+              search.send_keys('definitely-no-match-b4-2-e2e')
+              wait.until(lambda d: '검색 조건에 맞는 노트가 없습니다.' in d.page_source)
+              search.clear()
+              wait.until(lambda d: updated_title in d.page_source)
+
+              # Delete and confirm disappearance from the list.
+              driver.find_element(By.LINK_TEXT, updated_title).click()
+              wait_h1(updated_title)
+              driver.find_element(By.XPATH, "//button[normalize-space()='삭제']").click()
+              wait.until(EC.visibility_of_element_located((By.ID, 'confirm-title')))
+              dialog = driver.find_element(By.CSS_SELECTOR, '[role="dialog"]')
+              dialog.find_element(By.XPATH, ".//button[normalize-space()='삭제']").click()
+              wait_h1('노트 목록')
+              wait.until(lambda d: updated_title not in d.page_source)
+
+              # Direct unknown route must render the React Not Found page.
+              driver.get(BASE + 'route-that-does-not-exist')
+              wait_h1('404 - Not Found')
+
+              print('LIVE_E2E_PASS: root, direct-route refresh, validation, create, read, update, empty-search, delete, not-found')
+          finally:
+              driver.quit()
+          PY
