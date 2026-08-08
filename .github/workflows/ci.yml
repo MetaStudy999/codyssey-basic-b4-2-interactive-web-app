@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pages: read
 
 jobs:
   test-build:
@@ -68,10 +69,16 @@ jobs:
           git push --force origin HEAD:runtime-dist
       - name: Wait for GitHub Pages build
         if: github.event_name == 'push' && github.ref == 'refs/heads/mission/b4-2'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           api="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest"
           for attempt in $(seq 1 36); do
-            payload=$(curl -fsSL "$api" || true)
+            payload=$(curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$api" || true)
             status=$(printf '%s' "$payload" | python -c 'import json,sys; d=json.load(sys.stdin); print(d.get("status", ""))' 2>/dev/null || true)
             commit=$(printf '%s' "$payload" | python -c 'import json,sys; d=json.load(sys.stdin); print(d.get("commit", ""))' 2>/dev/null || true)
             echo "Pages attempt ${attempt}: status=${status} commit=${commit} expected=${RUNTIME_SHA}"
@@ -113,7 +120,6 @@ jobs:
               driver.get(BASE)
               wait_h1('Learning Notes')
 
-              # Direct route refresh must restore the SPA through GitHub Pages 404 fallback.
               driver.get(BASE + 'notes')
               wait_h1('노트 목록')
               driver.refresh()
@@ -121,25 +127,19 @@ jobs:
 
               driver.get(BASE + 'notes/new')
               wait_h1('새 노트')
-
-              # Required field validation.
               driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
               wait.until(lambda d: '제목을 입력하세요.' in d.page_source and '내용을 입력하세요.' in d.page_source)
 
-              # Create.
               driver.find_element(By.ID, 'title').send_keys(title)
               driver.find_element(By.ID, 'content').send_keys('GitHub Pages deployed CRUD smoke evidence')
               driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
               wait_h1(title)
-              created_url = driver.current_url
-              assert '/notes/' in created_url, created_url
+              assert '/notes/' in driver.current_url, driver.current_url
 
-              # Read persists across a hard refresh.
               driver.refresh()
               wait_h1(title)
               wait.until(lambda d: 'GitHub Pages deployed CRUD smoke evidence' in d.page_source)
 
-              # Update.
               driver.find_element(By.LINK_TEXT, '수정').click()
               wait_h1('노트 수정')
               title_input = driver.find_element(By.ID, 'title')
@@ -148,7 +148,6 @@ jobs:
               driver.find_element(By.XPATH, "//button[normalize-space()='수정 저장']").click()
               wait_h1(updated_title)
 
-              # List and client-side empty search state.
               driver.find_element(By.LINK_TEXT, '목록으로').click()
               wait_h1('노트 목록')
               wait.until(lambda d: updated_title in d.page_source)
@@ -158,7 +157,6 @@ jobs:
               search.clear()
               wait.until(lambda d: updated_title in d.page_source)
 
-              # Delete and confirm disappearance from the list.
               driver.find_element(By.LINK_TEXT, updated_title).click()
               wait_h1(updated_title)
               driver.find_element(By.XPATH, "//button[normalize-space()='삭제']").click()
@@ -168,7 +166,6 @@ jobs:
               wait_h1('노트 목록')
               wait.until(lambda d: updated_title not in d.page_source)
 
-              # Direct unknown route must render the React Not Found page.
               driver.get(BASE + 'route-that-does-not-exist')
               wait_h1('404 - Not Found')
 
