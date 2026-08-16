@@ -4,6 +4,14 @@
 현재 모드: **Phase A — REFERENCE BUILD**  
 Runtime Mission 상태: **⬜ NOT STARTED**
 
+## 선행 학습
+
+- **필수 선행 미션:** 없음
+- **권장 선행 미션:** B4-1
+- **있으면 좋은 선행 지식:** DOM Event, `fetch`, 비동기 처리, SPA 개념, React 기초
+
+B4-1에서 HTML/CSS/JavaScript와 Browser/DOM 흐름을 먼저 익히면 React SPA와 원격 CRUD로 확장하기 쉽습니다. 웹 기초를 이미 이해하고 있다면 B4-1을 CLEAR하지 않고도 B4-2를 시작할 수 있습니다.
+
 ## 현재 판정
 
 React SPA + Supabase 원격 CRUD **Reference 핵심 기준본을 준비했습니다.** 실제 Supabase/배포 Runtime 전이므로 아직 `✅ CLEAR`가 아닙니다.
