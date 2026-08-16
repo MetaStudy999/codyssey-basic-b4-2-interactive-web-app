@@ -18,6 +18,7 @@ React SPA + Supabase 원격 CRUD **Reference 핵심 기준본을 준비했습니
 
 ## 핵심 문서
 
+- `START-CHECK.md` — Web/DOM/비동기/SPA 시작 전 자가진단
 - `REFERENCE-BUILD.md`
 - `REFERENCE-STATUS.md`
 - `BEGINNER-GUIDE.md`
@@ -26,6 +27,8 @@ React SPA + Supabase 원격 CRUD **Reference 핵심 기준본을 준비했습니
 - `docs/requirements-mapping.md`
 - `docs/evaluation-qa.md`
 - `evidence/README.md`
+
+`START-CHECK.md`는 공식 Gate가 아니라 부족한 웹 기초를 미리 확인하고 필요한 부분만 보충하기 위한 안내입니다.
 
 ## Reference 핵심
 
