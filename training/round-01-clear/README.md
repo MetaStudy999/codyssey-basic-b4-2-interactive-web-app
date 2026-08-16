@@ -1,11 +1,33 @@
-# Round 01 — CLEAR
+# B4-2 Round 01 — CLEAR
 
-입문자가 공식 미션과 평가 기준을 바탕으로 단계별로 따라가며 미션을 완료합니다.
+구분: **선택 미션 (OPTIONAL)**  
+현재 모드: **Phase A — REFERENCE BUILD**  
+Runtime Mission 상태: **⬜ NOT STARTED**
 
-진행 순서: Mission 확인 → 용어/개념 → 환경 → 구현 → 검증 → Evidence → CLEAR.
+## 현재 판정
 
-핵심 문서:
-- BEGINNER-GUIDE.md
-- CHECKLIST.md
+React SPA + Supabase 원격 CRUD **Reference 핵심 기준본을 준비했습니다.** 실제 Supabase/배포 Runtime 전이므로 아직 `✅ CLEAR`가 아닙니다.
 
-상세 폴더와 파일은 실제로 필요해지는 시점에만 생성합니다.
+## 핵심 문서
+
+- `REFERENCE-BUILD.md`
+- `REFERENCE-STATUS.md`
+- `BEGINNER-GUIDE.md`
+- `CHECKLIST.md`
+- `reference/README.md`
+- `docs/requirements-mapping.md`
+- `docs/evaluation-qa.md`
+- `evidence/README.md`
+
+## Reference 핵심
+
+- 6개 named route + Not Found
+- 10개 재사용 컴포넌트
+- `useItems`, `useItemDetail` custom hook
+- controlled form / validation / submitting
+- common Loading/Error/Empty
+- Supabase remote CRUD
+- state→render 변화 3개 이상
+- setup/verify/reset + SPA deployment rewrite
+
+Reference가 있다는 이유만으로 Runtime PASS를 표시하지 않습니다.
