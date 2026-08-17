@@ -1,0 +1,3 @@
+# B4-2 — Ubuntu 24.04 mission-specific APT packages
+# No additional APT packages are fixed here.
+# Node runtime/version follows the mission/project requirement; npm dependencies belong to package.json/lock files.
